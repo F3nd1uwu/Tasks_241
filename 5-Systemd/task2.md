@@ -14,6 +14,7 @@
 1. Создайте скрипт который создаёт папку заполняет её файлами ( имена 1-4 ) и записывает в них информацию
 о текущей дате, версии ядра, имени компьютера и списе всех файлов в домашнем каталоге пользователя от которого выполняется скрипт( не забудьте сдлеать проверку на существование файлов и папок)
 
+```
 #!/bin/bash
 
 # Папка, которую нужно создать
@@ -37,12 +38,9 @@ HOME_FILES=$(ls $HOME)
 # Запись информации в файлы
 for i in {1..4}; do
   FILE="$DIR_NAME/$i"
-  
-  # Проверка на существование файла
   if [ -e "$FILE" ]; then
-    echo "Файл '$FILE' уже существует."
+  echo "Файл '$FILE' уже существует."
   else
-    # Запись информации в файл
     {
       echo "Дата: $DATE"
       echo "Версия ядра: $KERNEL_VERSION"
@@ -53,11 +51,13 @@ for i in {1..4}; do
     echo "Информация записана в файл '$FILE'."
   fi
 done
+```
 
 2. Создайте юнит который будет вызывать этот скрипт при запуске. Проверьте
-sudo vi /etc/systemd/system/task.service
 
+sudo vi /etc/systemd/system/task.service
 В нем записать:
+```
 [Unit]
    Description=мой системд юнит
 
@@ -68,17 +68,17 @@ sudo vi /etc/systemd/system/task.service
 
    [Install]
    WantedBy=multi-user.target
-
+```
 Запускаем:
 sudo systemctl enable task.service
-
 Порверка:
 systemctl status task.service
 
 3. Создайте таймер который будет вызывать выполнение одноимённого systemd юнита каждые 5 минут.
-sudo vi /etc/systemd/system/task.timer
 
+sudo vi /etc/systemd/system/task.timer
 В него записать:
+```
 [Unit]
    Description=Таймер какой то...
 
@@ -89,26 +89,29 @@ sudo vi /etc/systemd/system/task.timer
 
    [Install]
    WantedBy=timers.target
-
+```
 Запускаем:
 sudo systemctl daemon-reload
 sudo systemctl enable --now task.timer
-
 Проверка:
 systemctl status task.timer
 
 4. От какого пользователя вызыаются юниты по умолчанию?
+
 root
 
 5. Создайте пользователя от имени которого будет выполняться ваш скрипт.
+
 sudo adduser systemdchel
 
 6. Дополните юнит информацией о пользователе от которого должен выплняться скрипт.
+
 В отделе [Service] запишем User=systemdchel
 
 7. Дополните ваш скрипт так, что бы он независимо от местоположения всего выполнялся в домашней папке того кто его вызывает.
-В начало скрипта добавить:
 
+В начало скрипта добавить:
+```
 USER_HOME=$(eval echo ~$USER)
 cd "$USER_HOME" || exit
-
+```
